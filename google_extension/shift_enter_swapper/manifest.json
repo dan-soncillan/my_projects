@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "ChatGPT Enterキー挙動スワッパー",
+  "name": "ChatGPT: Shift+Enter to Send",
   "version": "1.0.0",
-  "description": "ChatGPT専用：EnterとShift+Enterの動作を入れ替えます。Slackと同様に「Enter＝改行」「Shift+Enter＝送信」となるため、違和感なく快適に利用できます。",
+  "description": "ChatGPT専用：EnterとShift+Enterの動作を入れ替えます。Slackと同様に「Enter＝改行」「Shift+Enter＝送信」となるため、違和感なく快適に利用できます。 For ChatGPT only: Swap the behavior of Enter and Shift+Enter. Just like Slack, Enter = line break and Shift+Enter = send, making your ChatGPT experience seamless and intuitive.",
   "permissions": ["storage", "scripting", "activeTab"],
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://*.chatgpt.com/*"
   ],
   "action": {
-    "default_title": "Swap on this site"
+    "default_title": "Shift+Enter to Send"
   },
   "background": {
     "service_worker": "background.js"
@@ -24,5 +24,10 @@
       "run_at": "document_start"
     }
   ],
-  "options_page": "options.html"
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
 }
