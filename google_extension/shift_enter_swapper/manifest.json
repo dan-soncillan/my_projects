@@ -1,14 +1,28 @@
 {
   "manifest_version": 3,
-  "name": "Enter ↔ Shift+Enter Swapper (Per-Site)",
+  "name": "ChatGPT Enterキー挙動スワッパー",
   "version": "1.0.0",
-  "description": "指定したサイトでだけ Enter と Shift+Enter の動作を入れ替える拡張",
+  "description": "ChatGPT専用：EnterとShift+Enterの動作を入れ替えます。Slackと同様に「Enter＝改行」「Shift+Enter＝送信」となるため、違和感なく快適に利用できます。",
   "permissions": ["storage", "scripting", "activeTab"],
-  "host_permissions": ["<all_urls>"],
-  "action": { "default_title": "Swap on this site" },
-  "background": { "service_worker": "background.js" },
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://*.chatgpt.com/*"
+  ],
+  "action": {
+    "default_title": "Swap on this site"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
-    { "matches": ["<all_urls>"], "js": ["content.js"], "run_at": "document_start" }
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://*.chatgpt.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
   ],
   "options_page": "options.html"
 }
