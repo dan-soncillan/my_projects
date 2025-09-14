@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Enter ↔ Shift+Enter Swapper (Per-Site)",
+  "version": "1.0.0",
+  "description": "指定したサイトでだけ Enter と Shift+Enter の動作を入れ替える拡張",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "action": { "default_title": "Swap on this site" },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    { "matches": ["<all_urls>"], "js": ["content.js"], "run_at": "document_start" }
+  ],
+  "options_page": "options.html"
+}
