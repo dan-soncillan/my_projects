@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "ChatGPT: Shift+Enter to Send",
+  "version": "1.1.0",
+  "description": "ChatGPT only: Swap Enter and Shift+Enter. Slack-style input: Enter = line break, Shift+Enter = send.",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://*.chatgpt.com/*"
+  ],
+  "action": {
+    "default_title": "Shift+Enter to Send"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://*.chatgpt.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "options_page": "options.html"
+}
