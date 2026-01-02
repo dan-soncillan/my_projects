@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Prompt Counter",
+  "version": "0.1.0",
+  "description": "プロンプト送信回数を記録・可視化するChrome拡張",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://aistudio.google.com/*",
+    "https://gemini.google.com/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*"],
+      "js": ["content/chatgpt.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://claude.ai/*"],
+      "js": ["content/claude.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://aistudio.google.com/*", "https://gemini.google.com/*"],
+      "js": ["content/gemini.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon-128.png",
+    "48": "icons/icon-128.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "commands": {
+    "manual-count": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+1",
+        "mac": "Command+Shift+1"
+      },
+      "description": "Cursor手動カウント（+1）"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["dashboard/dashboard.html", "dashboard/dashboard.js", "dashboard/dashboard.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
+

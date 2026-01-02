@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Counter Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Prompt Counter Dashboard</h1>
+    </header>
+    
+    <main>
+      <section class="stats">
+        <div class="stat-card">
+          <div class="stat-label">今日の合計</div>
+          <div class="stat-value" id="todayTotal">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">7日合計</div>
+          <div class="stat-value" id="weekTotal">-</div>
+        </div>
+      </section>
+      
+      <section class="chart-section">
+        <h2>7日推移</h2>
+        <div class="chart-container">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </section>
+      
+      <section class="chart-section">
+        <h2>ツール別内訳（7日間）</h2>
+        <div class="chart-container">
+          <canvas id="toolChart"></canvas>
+        </div>
+      </section>
+      
+      <section class="actions">
+        <button id="exportBtn" class="btn btn-primary">CSVエクスポート</button>
+        <button id="deleteBtn" class="btn btn-danger">データ全削除</button>
+      </section>
+    </main>
+  </div>
+  
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>
+
