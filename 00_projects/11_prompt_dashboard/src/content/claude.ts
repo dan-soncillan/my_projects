@@ -28,19 +28,31 @@ function setupButtonListener(): void {
     'button[aria-label*="Send"]',
     'button[aria-label*="送信"]',
     'button[data-icon="send"]',
+    'button[type="submit"]',
+    'button:has(svg[data-icon="send"])',
+    'button:has(svg[aria-label*="Send"])',
+    '[role="button"][aria-label*="Send"]',
+    '[role="button"][aria-label*="送信"]',
   ];
+  
+  console.log('[Prompt Counter] Claude content script loaded');
   
   const observer = new MutationObserver(() => {
     selectors.forEach(selector => {
-      const buttons = document.querySelectorAll(selector);
-      buttons.forEach(button => {
-        if (!button.hasAttribute('data-prompt-counter-listener')) {
-          button.setAttribute('data-prompt-counter-listener', 'true');
-          button.addEventListener('click', () => {
-            setTimeout(() => sendPromptEvent(), 100);
-          });
-        }
-      });
+      try {
+        const buttons = document.querySelectorAll(selector);
+        buttons.forEach(button => {
+          if (!button.hasAttribute('data-prompt-counter-listener')) {
+            button.setAttribute('data-prompt-counter-listener', 'true');
+            button.addEventListener('click', () => {
+              console.log('[Prompt Counter] Claude button clicked');
+              setTimeout(() => sendPromptEvent(), 100);
+            });
+          }
+        });
+      } catch (e) {
+        // セレクタが無効な場合（:has()など）は無視
+      }
     });
   });
   
@@ -51,14 +63,19 @@ function setupButtonListener(): void {
   
   // 既存のボタンにもリスナーを追加
   selectors.forEach(selector => {
-    document.querySelectorAll(selector).forEach(button => {
-      if (!button.hasAttribute('data-prompt-counter-listener')) {
-        button.setAttribute('data-prompt-counter-listener', 'true');
-        button.addEventListener('click', () => {
-          setTimeout(() => sendPromptEvent(), 100);
-        });
-      }
-    });
+    try {
+      document.querySelectorAll(selector).forEach(button => {
+        if (!button.hasAttribute('data-prompt-counter-listener')) {
+          button.setAttribute('data-prompt-counter-listener', 'true');
+          button.addEventListener('click', () => {
+            console.log('[Prompt Counter] Claude button clicked');
+            setTimeout(() => sendPromptEvent(), 100);
+          });
+        }
+      });
+    } catch (e) {
+      // セレクタが無効な場合（:has()など）は無視
+    }
   });
 }
 
@@ -76,6 +93,7 @@ function setupKeyboardListener(): void {
         target.isContentEditable ||
         target.closest('[contenteditable="true"]')
       ) {
+        console.log('[Prompt Counter] Claude Enter key pressed');
         sendPromptEvent();
       }
     }
@@ -92,18 +110,53 @@ function setupKeyboardListener(): void {
 }
 
 /**
- * 初期化
+ * フォーム送信を検知（フォールバック）
+ */
+function setupFormListener(): void {
+  // フォーム送信イベントを監視
+  document.addEventListener('submit', (e) => {
+    const target = e.target as HTMLElement;
+    // テキストエリアやinputがあるフォームのみ
+    if (target.querySelector('textarea, input[type="text"]')) {
+      console.log('[Prompt Counter] Claude form submitted');
+      sendPromptEvent();
+    }
+  }, true); // キャプチャフェーズで監視
+}
+
+/**
+ * 初期化（遅延付き）
  */
 function init(): void {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+  console.log('[Prompt Counter] Claude content script initializing');
+  
+  // ページが完全に読み込まれるまで待つ
+  const initialize = () => {
+    // 少し遅延させて、動的コンテンツが読み込まれるのを待つ
+    setTimeout(() => {
       setupButtonListener();
       setupKeyboardListener();
-    });
+      setupFormListener();
+      
+      // 定期的に再初期化を試みる（SPAのルーティングに対応）
+      setInterval(() => {
+        setupButtonListener();
+      }, 2000);
+    }, 500);
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
   } else {
-    setupButtonListener();
-    setupKeyboardListener();
+    initialize();
   }
+  
+  // ページが完全に読み込まれた後も再初期化
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      setupButtonListener();
+    }, 1000);
+  });
 }
 
 init();

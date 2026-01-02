@@ -22,10 +22,10 @@ export default defineConfig({
       output: {
         entryFileNames: '[name].js',
         format: 'iife',
+        // 各エントリーポイントを完全に独立したバンドルにする
+        // Chrome拡張機能では各スクリプトが独立している必要がある
       },
     },
-    // ビルド後にHTMLファイルとCSSファイルをコピー
-    write: true,
   },
   plugins: [
     {
@@ -73,8 +73,18 @@ export default defineConfig({
         if (existsSync(manifestSrc)) {
           copyFileSync(manifestSrc, manifestDest);
         }
+        
+        // アイコンファイルをコピー
+        const iconSrc = resolve(__dirname, 'src/icons/icon-128.png');
+        const iconDest = resolve(__dirname, 'dist/icons/icon-128.png');
+        const iconDestDir = resolve(__dirname, 'dist/icons');
+        if (!existsSync(iconDestDir)) {
+          mkdirSync(iconDestDir, { recursive: true });
+        }
+        if (existsSync(iconSrc)) {
+          copyFileSync(iconSrc, iconDest);
+        }
       },
     },
   ],
 });
-

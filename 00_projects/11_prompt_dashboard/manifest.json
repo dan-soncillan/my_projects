@@ -10,7 +10,8 @@
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://claude.ai/*",
-    "https://aistudio.google.com/*"
+    "https://aistudio.google.com/*",
+    "https://gemini.google.com/*"
   ],
   "background": {
     "service_worker": "background/service-worker.js"
@@ -27,11 +28,16 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://aistudio.google.com/*"],
+      "matches": ["https://aistudio.google.com/*", "https://gemini.google.com/*"],
       "js": ["content/gemini.js"],
       "run_at": "document_idle"
     }
   ],
+  "icons": {
+    "16": "icons/icon-128.png",
+    "48": "icons/icon-128.png",
+    "128": "icons/icon-128.png"
+  },
   "action": {
     "default_popup": "popup/popup.html"
   },

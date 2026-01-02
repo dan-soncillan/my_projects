@@ -17,7 +17,7 @@ async function updateTodayCount(): Promise<void> {
  * 手動カウントボタンの処理
  */
 function setupManualCountButton(): void {
-  const button = document.getElementById('manualCountBtn');
+  const button = document.getElementById('manualCountBtn') as HTMLButtonElement;
   if (!button) return;
   
   button.addEventListener('click', async () => {
