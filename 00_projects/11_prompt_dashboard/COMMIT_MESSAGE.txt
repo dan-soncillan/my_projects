@@ -1,0 +1,40 @@
+fix: Chrome拡張機能のビルドと動作修正
+
+## 主な変更内容
+
+### ビルドシステムの改善
+- vite.config.ts: IIFE形式でのビルドに対応（複数エントリーポイント対応）
+- build.mjs: 各エントリーポイントを個別にビルドするスクリプトを追加
+- package.json: buildスクリプトをbuild.mjsに変更
+
+### Manifest設定の修正
+- manifest.json: GeminiのURLパターンに`gemini.google.com/*`を追加
+- host_permissionsに`gemini.google.com/*`を追加
+
+### Content Scriptsの改善
+- claude.ts: 
+  - デバッグログの追加
+  - より広範囲なセレクタの追加
+  - 初期化の遅延と再初期化機能を追加
+  - フォーム送信イベントの監視を追加
+  
+- gemini.ts:
+  - デバッグログの追加
+  - より広範囲なセレクタの追加
+  - 初期化の遅延と再初期化機能を追加
+  - フォーム送信イベントの監視を追加
+  - 入力フィールドの監視を追加
+  - MutationObserverで属性変更も監視
+
+### 型エラーの修正
+- popup.ts: HTMLButtonElementへの型キャストを追加
+
+## 動作確認
+- ✅ ChatGPT: 自動カウント（Enterキー、送信ボタン）
+- ✅ Claude: 自動カウント（Enterキー、送信ボタン）
+- ✅ Gemini: 自動カウント（Enterキー、送信ボタン）
+- ✅ 手動カウント: Cursor用の+1ボタン
+- ✅ ダッシュボード: 統計表示とグラフ
+- ✅ CSVエクスポート: データのエクスポート
+- ✅ データ削除: 全削除機能
+
