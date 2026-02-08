@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechFlow Inc. - Revenue Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        surface: {
+          50: '#f8f9fc',
+          100: '#f1f3f8',
+          200: '#e4e7f0',
+          300: '#d1d5e3',
+        },
+        navy: {
+          50: '#eef1f8',
+          100: '#d4daf0',
+          200: '#a8b4de',
+          300: '#7b8ec9',
+          400: '#5570b8',
+          500: '#1e3a6e',
+          600: '#1a3260',
+          700: '#152850',
+          800: '#111f40',
+          900: '#0c1630',
+        },
+        accent: {
+          blue: '#2563eb',
+          cyan: '#0891b2',
+          green: '#16a34a',
+          red: '#dc2626',
+          yellow: '#d97706',
+          purple: '#7c3aed',
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  body { font-family: 'Inter', sans-serif; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #f1f3f8; }
+  ::-webkit-scrollbar-thumb { background: #d1d5e3; border-radius: 3px; }
+  .tab-active { border-bottom: 2px solid #1e3a6e; color: #1e3a6e; font-weight: 600; }
+  .tab-inactive { border-bottom: 2px solid transparent; color: #64748b; }
+  .tab-inactive:hover { color: #1e293b; }
+  .card { background: #ffffff; border: 1px solid #e4e7f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .kpi-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .alert-red { border-left: 4px solid #dc2626; }
+  .alert-yellow { border-left: 4px solid #d97706; }
+  .alert-green { border-left: 4px solid #16a34a; }
+  .badge-red { background: #fef2f2; color: #dc2626; }
+  .badge-yellow { background: #fffbeb; color: #d97706; }
+  .badge-green { background: #f0fdf4; color: #16a34a; }
+  .apexcharts-tooltip { background: #ffffff !important; border: 1px solid #e4e7f0 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+  .apexcharts-tooltip-title { background: #f8f9fc !important; border-bottom: 1px solid #e4e7f0 !important; }
+  .apexcharts-tooltip .apexcharts-tooltip-text { color: #1e293b !important; }
+</style>
+</head>
+<body class="bg-surface-100 text-slate-700 min-h-screen">
+
+<!-- Header -->
+<header class="bg-navy-500 px-6 py-4">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-9 h-9 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center">
+        <span class="text-white font-bold text-sm">TF</span>
+      </div>
+      <div>
+        <h1 class="text-lg font-semibold text-white">TechFlow Inc.</h1>
+        <p class="text-xs text-navy-200">Revenue Operations Dashboard</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-sm text-navy-200">Week of 2026-02-03</span>
+      <span class="text-xs bg-white/15 text-white px-3 py-1 rounded-full">DEMO</span>
+    </div>
+  </div>
+</header>
+
+<!-- Tabs -->
+<nav class="bg-white border-b border-surface-200 px-6">
+  <div class="max-w-7xl mx-auto flex gap-8">
+    <button onclick="switchTab('exec')" id="tab-exec" class="tab-active py-3 px-1 text-sm font-medium transition-colors">
+      Exec Summary
+    </button>
+    <button onclick="switchTab('driver')" id="tab-driver" class="tab-inactive py-3 px-1 text-sm font-medium transition-colors">
+      Driver Analysis
+    </button>
+    <button onclick="switchTab('action')" id="tab-action" class="tab-inactive py-3 px-1 text-sm font-medium transition-colors">
+      Action Alerts
+    </button>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto p-6">
+
+  <!-- Tab 1: Exec Summary -->
+  <div id="panel-exec">
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="card p-5 kpi-card">
+        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">MRR</p>
+        <p class="text-2xl font-bold text-navy-800" id="kpi-mrr"></p>
+        <p class="text-sm mt-1" id="kpi-mrr-change"></p>
+      </div>
+      <div class="card p-5 kpi-card">
+        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">新規商談数</p>
+        <p class="text-2xl font-bold text-navy-800" id="kpi-deals"></p>
+        <p class="text-sm mt-1" id="kpi-deals-change"></p>
+      </div>
+      <div class="card p-5 kpi-card">
+        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">受注率</p>
+        <p class="text-2xl font-bold text-navy-800" id="kpi-winrate"></p>
+        <p class="text-sm mt-1" id="kpi-winrate-change"></p>
+      </div>
+      <div class="card p-5 kpi-card">
+        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Churn Rate</p>
+        <p class="text-2xl font-bold text-navy-800" id="kpi-churn"></p>
+        <p class="text-sm mt-1" id="kpi-churn-change"></p>
+      </div>
+    </div>
+
+    <!-- MRR Trend + ARR Gauge -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div class="card p-5 lg:col-span-2">
+        <h3 class="text-sm font-medium text-navy-700 mb-4">MRR推移（12ヶ月）</h3>
+        <div id="chart-mrr-trend"></div>
+      </div>
+      <div class="card p-5">
+        <h3 class="text-sm font-medium text-navy-700 mb-4">ARR目標進捗</h3>
+        <div id="chart-arr-gauge"></div>
+        <div class="text-center mt-2">
+          <p class="text-xs text-slate-400">年間目標: <span class="text-navy-800 font-medium">5.0億円</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- NRR Trend -->
+    <div class="card p-5">
+      <h3 class="text-sm font-medium text-navy-700 mb-4">NRR推移（12ヶ月）</h3>
+      <div id="chart-nrr-trend"></div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Driver Analysis -->
+  <div id="panel-driver" class="hidden">
+    <!-- Plan MRR Breakdown + Channel Deals -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+      <div class="card p-5">
+        <h3 class="text-sm font-medium text-navy-700 mb-4">プラン別MRR内訳</h3>
+        <div id="chart-plan-donut"></div>
+      </div>
+      <div class="card p-5">
+        <h3 class="text-sm font-medium text-navy-700 mb-4">チャネル別新規商談</h3>
+        <div id="chart-channel-bar"></div>
+      </div>
+    </div>
+
+    <!-- Win Rate by Segment + Lead Time -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+      <div class="card p-5">
+        <h3 class="text-sm font-medium text-navy-700 mb-4">受注率の推移（セグメント別）</h3>
+        <div id="chart-winrate-segment"></div>
+      </div>
+      <div class="card p-5">
+        <h3 class="text-sm font-medium text-navy-700 mb-4">リードタイム分布（商談→受注）</h3>
+        <div id="chart-leadtime"></div>
+      </div>
+    </div>
+
+    <!-- Cohort Table -->
+    <div class="card p-5">
+      <h3 class="text-sm font-medium text-navy-700 mb-4">顧客規模別コホート</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-slate-500 border-b border-surface-200">
+              <th class="text-left py-3 px-4 font-medium">セグメント</th>
+              <th class="text-right py-3 px-4 font-medium">顧客数</th>
+              <th class="text-right py-3 px-4 font-medium">MRR</th>
+              <th class="text-right py-3 px-4 font-medium">MRR構成比</th>
+              <th class="text-right py-3 px-4 font-medium">ARPA</th>
+              <th class="text-right py-3 px-4 font-medium">Churn Rate</th>
+              <th class="text-right py-3 px-4 font-medium">NRR</th>
+            </tr>
+          </thead>
+          <tbody id="cohort-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: Action Alerts -->
+  <div id="panel-action" class="hidden">
+    <!-- Alert Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6" id="alert-cards"></div>
+
+    <!-- Weekly Change Table -->
+    <div class="card p-5 mb-6">
+      <h3 class="text-sm font-medium text-navy-700 mb-4">週次変化テーブル</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-slate-500 border-b border-surface-200">
+              <th class="text-left py-3 px-4 font-medium">KPI</th>
+              <th class="text-right py-3 px-4 font-medium">今週</th>
+              <th class="text-right py-3 px-4 font-medium">先週</th>
+              <th class="text-right py-3 px-4 font-medium">4週平均</th>
+              <th class="text-right py-3 px-4 font-medium">変化率</th>
+              <th class="text-center py-3 px-4 font-medium">ステータス</th>
+            </tr>
+          </thead>
+          <tbody id="weekly-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recommended Actions -->
+    <div class="card p-5">
+      <h3 class="text-sm font-medium text-navy-700 mb-4">推奨アクション</h3>
+      <div id="recommended-actions" class="space-y-3"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-surface-200 px-6 py-4 mt-8">
+  <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-400">
+    <p>Powered by Weekly KPI Ops</p>
+    <p>Data as of 2026-02-03 — Demo Environment</p>
+  </div>
+</footer>
+
+<script>
+// ==========================================
+// DATA GENERATION
+// ==========================================
+
+const MONTHS = ['2025-03','2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02'];
+const MONTH_LABELS = ['3月','4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月'];
+
+function generateMonthlyData() {
+  const data = { months: MONTHS, labels: MONTH_LABELS };
+  let mrr = 2000;
+  data.mrr = [];
+  data.newMrr = [];
+  data.expansionMrr = [];
+  data.churnedMrr = [];
+  data.grossChurn = [];
+  data.nrr = [];
+  data.deals = [];
+  data.winRate = [];
+
+  for (let i = 0; i < 12; i++) {
+    const newMrr = mrr * (0.06 + Math.random() * 0.02);
+    const expansion = mrr * (0.02 + Math.random() * 0.01);
+    const churned = mrr * (0.015 + Math.random() * 0.01);
+
+    data.newMrr.push(Math.round(newMrr));
+    data.expansionMrr.push(Math.round(expansion));
+    data.churnedMrr.push(Math.round(-churned));
+
+    mrr = mrr + newMrr + expansion - churned;
+    data.mrr.push(Math.round(mrr));
+    data.grossChurn.push(+(1.5 + Math.random() * 1.0).toFixed(1));
+
+    const baseNrr = 108 + (i / 11) * 3;
+    data.nrr.push(+(baseNrr + (Math.random() - 0.5) * 2).toFixed(1));
+
+    const baseDeals = 32 + (i / 11) * 15;
+    data.deals.push(Math.round(baseDeals + (Math.random() - 0.5) * 8));
+
+    const baseWinRate = 27 + (i / 11) * 5;
+    data.winRate.push(+(baseWinRate + (Math.random() - 0.5) * 4).toFixed(1));
+  }
+  return data;
+}
+
+function generateWeeklyData() {
+  return {
+    weeks: ['W1 (1/13)','W2 (1/20)','W3 (1/27)','W4 (2/3)'],
+    mrr: [2920, 2955, 2980, 3020],
+    newDeals: [12, 14, 11, 8],
+    winRate: [31.2, 29.8, 28.5, 26.1],
+    churn: [1.8, 1.9, 2.1, 2.4],
+    nrr: [110.5, 110.2, 109.8, 109.3],
+    pipeline: [48, 52, 45, 42],
+    avgDealSize: [16.2, 15.8, 15.5, 14.9],
+  };
+}
+
+function generateSegmentWinRate() {
+  const segments = { smb: [], midMarket: [], enterprise: [] };
+  for (let i = 0; i < 12; i++) {
+    segments.smb.push(+(35 + (Math.random() - 0.5) * 6).toFixed(1));
+    segments.midMarket.push(+(28 + (Math.random() - 0.5) * 5).toFixed(1));
+    segments.enterprise.push(+(18 + (Math.random() - 0.5) * 4 + (i / 11) * 3).toFixed(1));
+  }
+  return segments;
+}
+
+function generateLeadTimeData() {
+  const buckets = ['0-14日','15-21日','22-28日','29-35日','36-42日','43-56日','57日+'];
+  const counts = [8, 18, 32, 28, 22, 12, 5];
+  return { buckets, counts };
+}
+
+const monthlyData = generateMonthlyData();
+const weeklyData = generateWeeklyData();
+const segmentWinRate = generateSegmentWinRate();
+const leadTimeData = generateLeadTimeData();
+
+const currentMRR = monthlyData.mrr[11];
+const prevMRR = monthlyData.mrr[10];
+const mrrChange = ((currentMRR - prevMRR) / prevMRR * 100).toFixed(1);
+
+const currentDeals = monthlyData.deals[11];
+const prevDeals = monthlyData.deals[10];
+const dealsChange = ((currentDeals - prevDeals) / prevDeals * 100).toFixed(1);
+
+const currentWinRate = monthlyData.winRate[11];
+const prevWinRate = monthlyData.winRate[10];
+const winRateChange = (currentWinRate - prevWinRate).toFixed(1);
+
+const currentChurn = monthlyData.grossChurn[11];
+const prevChurn = monthlyData.grossChurn[10];
+const churnChange = (currentChurn - prevChurn).toFixed(1);
+
+const cohortData = [
+  { segment: 'SMB', customers: 112, mrr: 560, churn: 2.8, nrr: 104, arpa: 5.0 },
+  { segment: 'Mid-Market', customers: 52, mrr: 780, churn: 1.5, nrr: 112, arpa: 15.0 },
+  { segment: 'Enterprise', customers: 18, mrr: 900, churn: 0.8, nrr: 118, arpa: 50.0 },
+];
+const totalCohortMrr = cohortData.reduce((s, c) => s + c.mrr, 0);
+
+const planData = {
+  labels: ['Starter', 'Growth', 'Enterprise'],
+  series: [560, 780, 900],
+  colors: ['#0891b2', '#2563eb', '#7c3aed'],
+};
+
+const channelData = {
+  labels: ['Inbound', 'Outbound', 'Referral', 'Partner'],
+  values: [22, 14, 8, 4],
+};
+
+// ==========================================
+// TAB SWITCHING
+// ==========================================
+
+let currentTab = 'exec';
+
+function switchTab(tab) {
+  document.getElementById('panel-exec').classList.add('hidden');
+  document.getElementById('panel-driver').classList.add('hidden');
+  document.getElementById('panel-action').classList.add('hidden');
+
+  document.getElementById('tab-exec').className = 'tab-inactive py-3 px-1 text-sm font-medium transition-colors';
+  document.getElementById('tab-driver').className = 'tab-inactive py-3 px-1 text-sm font-medium transition-colors';
+  document.getElementById('tab-action').className = 'tab-inactive py-3 px-1 text-sm font-medium transition-colors';
+
+  document.getElementById('panel-' + tab).classList.remove('hidden');
+  document.getElementById('tab-' + tab).className = 'tab-active py-3 px-1 text-sm font-medium transition-colors';
+
+  currentTab = tab;
+
+  if (tab === 'driver' && !driverRendered) {
+    renderDriverCharts();
+    driverRendered = true;
+  }
+  if (tab === 'action' && !actionRendered) {
+    renderActionTab();
+    actionRendered = true;
+  }
+}
+
+// ==========================================
+// CHART CONFIG DEFAULTS (LIGHT THEME)
+// ==========================================
+
+const chartDefaults = {
+  chart: { background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+  theme: { mode: 'light' },
+  grid: { borderColor: '#e4e7f0', strokeDashArray: 3 },
+  tooltip: { theme: 'light' },
+  xaxis: { labels: { style: { colors: '#64748b', fontSize: '11px' } }, axisBorder: { color: '#e4e7f0' }, axisTicks: { color: '#e4e7f0' } },
+  yaxis: { labels: { style: { colors: '#64748b', fontSize: '11px' } } },
+  legend: { labels: { colors: '#334155' }, fontSize: '12px' },
+};
+
+function mergeDefaults(opts) {
+  return {
+    ...chartDefaults,
+    ...opts,
+    chart: { ...chartDefaults.chart, ...opts.chart },
+    grid: { ...chartDefaults.grid, ...(opts.grid || {}) },
+    tooltip: { ...chartDefaults.tooltip, ...(opts.tooltip || {}) },
+    xaxis: { ...chartDefaults.xaxis, ...(opts.xaxis || {}), labels: { ...chartDefaults.xaxis.labels, ...(opts.xaxis?.labels || {}) } },
+    yaxis: opts.yaxis ? (Array.isArray(opts.yaxis) ? opts.yaxis : { ...chartDefaults.yaxis, ...opts.yaxis }) : chartDefaults.yaxis,
+    legend: { ...chartDefaults.legend, ...(opts.legend || {}) },
+  };
+}
+
+// ==========================================
+// RENDER: EXEC SUMMARY
+// ==========================================
+
+function renderKPICards() {
+  document.getElementById('kpi-mrr').textContent = `${(currentMRR).toLocaleString()}万円`;
+  const mrrEl = document.getElementById('kpi-mrr-change');
+  mrrEl.textContent = `${mrrChange > 0 ? '+' : ''}${mrrChange}% vs 先月`;
+  mrrEl.className = `text-sm mt-1 ${mrrChange >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+  document.getElementById('kpi-deals').textContent = `${currentDeals}件`;
+  const dealsEl = document.getElementById('kpi-deals-change');
+  dealsEl.textContent = `${dealsChange > 0 ? '+' : ''}${dealsChange}% vs 先月`;
+  dealsEl.className = `text-sm mt-1 ${dealsChange >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+  document.getElementById('kpi-winrate').textContent = `${currentWinRate}%`;
+  const winEl = document.getElementById('kpi-winrate-change');
+  winEl.textContent = `${winRateChange > 0 ? '+' : ''}${winRateChange}pt vs 先月`;
+  winEl.className = `text-sm mt-1 ${winRateChange >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+  document.getElementById('kpi-churn').textContent = `${currentChurn}%`;
+  const churnEl = document.getElementById('kpi-churn-change');
+  churnEl.textContent = `${churnChange > 0 ? '+' : ''}${churnChange}pt vs 先月`;
+  churnEl.className = `text-sm mt-1 ${churnChange <= 0 ? 'text-green-600' : 'text-red-600'}`;
+}
+
+function renderMRRTrend() {
+  new ApexCharts(document.getElementById('chart-mrr-trend'), mergeDefaults({
+    chart: { type: 'bar', height: 300, stacked: true },
+    series: [
+      { name: 'New MRR', data: monthlyData.newMrr },
+      { name: 'Expansion', data: monthlyData.expansionMrr },
+      { name: 'Churned', data: monthlyData.churnedMrr },
+    ],
+    colors: ['#1e3a6e', '#0891b2', '#dc2626'],
+    plotOptions: { bar: { columnWidth: '55%', borderRadius: 2 } },
+    xaxis: { categories: MONTH_LABELS },
+    yaxis: { labels: { formatter: v => `${Math.round(v)}万` } },
+    tooltip: { y: { formatter: v => `${v.toLocaleString()}万円` } },
+    legend: { position: 'top' },
+  })).render();
+}
+
+function renderARRGauge() {
+  const currentARR = currentMRR * 12;
+  const targetARR = 50000;
+  const pct = Math.round((currentARR / targetARR) * 100);
+
+  new ApexCharts(document.getElementById('chart-arr-gauge'), {
+    chart: { type: 'radialBar', height: 260, background: 'transparent', fontFamily: 'Inter, sans-serif' },
+    series: [pct],
+    plotOptions: {
+      radialBar: {
+        startAngle: -135, endAngle: 135,
+        hollow: { size: '65%' },
+        track: { background: '#e4e7f0', strokeWidth: '100%' },
+        dataLabels: {
+          name: { fontSize: '13px', color: '#64748b', offsetY: -10 },
+          value: { fontSize: '28px', fontWeight: 700, color: '#1e3a6e', offsetY: 5, formatter: () => `${pct}%` },
+        },
+      },
+    },
+    fill: {
+      type: 'gradient',
+      gradient: { shade: 'light', type: 'horizontal', stops: [0, 100], colorStops: [
+        { offset: 0, color: '#1e3a6e' }, { offset: 100, color: '#2563eb' }
+      ]},
+    },
+    labels: [`ARR ${(currentARR / 10000).toFixed(1)}億円`],
+    theme: { mode: 'light' },
+  }).render();
+}
+
+function renderNRRTrend() {
+  new ApexCharts(document.getElementById('chart-nrr-trend'), mergeDefaults({
+    chart: { type: 'line', height: 250 },
+    series: [{ name: 'NRR', data: monthlyData.nrr }],
+    colors: ['#7c3aed'],
+    stroke: { width: 3, curve: 'smooth' },
+    xaxis: { categories: MONTH_LABELS },
+    yaxis: { min: 105, max: 115, labels: { formatter: v => `${v}%` } },
+    annotations: {
+      yaxis: [{ y: 100, borderColor: '#dc2626', strokeDashArray: 4, label: { text: '100%', style: { color: '#dc2626', background: 'transparent' } } }],
+    },
+    markers: { size: 4, strokeWidth: 0 },
+    tooltip: { y: { formatter: v => `${v}%` } },
+  })).render();
+}
+
+// ==========================================
+// RENDER: DRIVER ANALYSIS
+// ==========================================
+
+let driverRendered = false;
+
+function renderDriverCharts() {
+  // Plan donut
+  new ApexCharts(document.getElementById('chart-plan-donut'), {
+    chart: { type: 'donut', height: 320, background: 'transparent', fontFamily: 'Inter, sans-serif' },
+    series: planData.series,
+    labels: planData.labels,
+    colors: planData.colors,
+    plotOptions: { pie: { donut: { size: '60%', labels: { show: true, total: { show: true, label: 'Total MRR', fontSize: '12px', color: '#64748b', formatter: () => `${totalCohortMrr.toLocaleString()}万円` } } } } },
+    stroke: { width: 2, colors: ['#ffffff'] },
+    legend: { position: 'bottom', labels: { colors: '#334155' }, fontSize: '12px' },
+    tooltip: { y: { formatter: v => `${v.toLocaleString()}万円` } },
+    theme: { mode: 'light' },
+  }).render();
+
+  // Channel bar
+  new ApexCharts(document.getElementById('chart-channel-bar'), mergeDefaults({
+    chart: { type: 'bar', height: 320 },
+    series: [{ name: '商談数', data: channelData.values }],
+    colors: ['#1e3a6e'],
+    plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '50%' } },
+    xaxis: { categories: channelData.labels },
+    tooltip: { y: { formatter: v => `${v}件` } },
+  })).render();
+
+  // Win rate by segment
+  new ApexCharts(document.getElementById('chart-winrate-segment'), mergeDefaults({
+    chart: { type: 'line', height: 300 },
+    series: [
+      { name: 'SMB', data: segmentWinRate.smb },
+      { name: 'Mid-Market', data: segmentWinRate.midMarket },
+      { name: 'Enterprise', data: segmentWinRate.enterprise },
+    ],
+    colors: ['#16a34a', '#2563eb', '#7c3aed'],
+    stroke: { width: 2, curve: 'smooth' },
+    xaxis: { categories: MONTH_LABELS },
+    yaxis: { labels: { formatter: v => `${v}%` } },
+    markers: { size: 3, strokeWidth: 0 },
+    legend: { position: 'top' },
+    tooltip: { y: { formatter: v => `${v}%` } },
+  })).render();
+
+  // Lead time histogram
+  new ApexCharts(document.getElementById('chart-leadtime'), mergeDefaults({
+    chart: { type: 'bar', height: 300 },
+    series: [{ name: '商談数', data: leadTimeData.counts }],
+    colors: ['#0891b2'],
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '65%' } },
+    xaxis: { categories: leadTimeData.buckets },
+    yaxis: { labels: { formatter: v => `${v}件` } },
+    tooltip: { y: { formatter: v => `${v}件` } },
+    annotations: {
+      xaxis: [{ x: '22-28日', borderColor: '#d97706', strokeDashArray: 0, label: { text: '平均 28日', style: { color: '#d97706', background: '#ffffff', padding: { left: 8, right: 8, top: 2, bottom: 2 } } } }],
+    },
+  })).render();
+
+  renderCohortTable();
+}
+
+function renderCohortTable() {
+  const tbody = document.getElementById('cohort-table-body');
+  const rows = cohortData.map(c => {
+    const pct = ((c.mrr / totalCohortMrr) * 100).toFixed(1);
+    const churnClass = c.churn > 2 ? 'text-red-600' : c.churn > 1.5 ? 'text-yellow-600' : 'text-green-600';
+    const nrrClass = c.nrr >= 110 ? 'text-green-600' : c.nrr >= 100 ? 'text-yellow-600' : 'text-red-600';
+    return `<tr class="border-b border-surface-200 hover:bg-surface-50 transition-colors">
+      <td class="py-3 px-4 font-medium text-navy-800">${c.segment}</td>
+      <td class="py-3 px-4 text-right">${c.customers}社</td>
+      <td class="py-3 px-4 text-right">${c.mrr.toLocaleString()}万円</td>
+      <td class="py-3 px-4 text-right">${pct}%</td>
+      <td class="py-3 px-4 text-right">${c.arpa}万円</td>
+      <td class="py-3 px-4 text-right ${churnClass}">${c.churn}%</td>
+      <td class="py-3 px-4 text-right ${nrrClass}">${c.nrr}%</td>
+    </tr>`;
+  });
+
+  const totalCustomers = cohortData.reduce((s, c) => s + c.customers, 0);
+  const avgChurn = (cohortData.reduce((s, c) => s + c.churn * c.mrr, 0) / totalCohortMrr).toFixed(1);
+  const avgNrr = (cohortData.reduce((s, c) => s + c.nrr * c.mrr, 0) / totalCohortMrr).toFixed(1);
+  rows.push(`<tr class="font-medium text-navy-800 bg-navy-50">
+    <td class="py-3 px-4">合計 / 加重平均</td>
+    <td class="py-3 px-4 text-right">${totalCustomers}社</td>
+    <td class="py-3 px-4 text-right">${totalCohortMrr.toLocaleString()}万円</td>
+    <td class="py-3 px-4 text-right">100%</td>
+    <td class="py-3 px-4 text-right">${(totalCohortMrr / totalCustomers * 10000 / 10000).toFixed(1)}万円</td>
+    <td class="py-3 px-4 text-right">${avgChurn}%</td>
+    <td class="py-3 px-4 text-right">${avgNrr}%</td>
+  </tr>`);
+
+  tbody.innerHTML = rows.join('');
+}
+
+// ==========================================
+// RENDER: ACTION ALERTS
+// ==========================================
+
+let actionRendered = false;
+
+function renderActionTab() {
+  renderAlertCards();
+  renderWeeklyTable();
+  renderRecommendedActions();
+}
+
+function renderAlertCards() {
+  const alerts = [
+    {
+      level: 'red',
+      title: 'Starter Churn 急上昇',
+      description: 'Starterプランの月次Churn Rateが2.8%に上昇（先月比 +0.9pt）。直近3ヶ月で最悪の数値。',
+      metric: 'Churn: 2.8%',
+      icon: '↑',
+    },
+    {
+      level: 'red',
+      title: 'Outbound受注率 3週連続低下',
+      description: 'Outbound商談の受注率が31.2% → 26.1%と3週連続で低下中。リード品質またはナーチャリングに問題の可能性。',
+      metric: '受注率: 26.1%',
+      icon: '↓',
+    },
+    {
+      level: 'yellow',
+      title: 'Enterprise新規商談ゼロ',
+      description: '今月のEnterprise新規商談が0件。先月は3件。パイプラインの枯渇リスク。',
+      metric: '新規: 0件',
+      icon: '!',
+    },
+    {
+      level: 'yellow',
+      title: '平均商談サイズ縮小傾向',
+      description: '平均商談サイズが4週連続で減少（16.2万→14.9万）。ダウンセルまたはSMBシフトの兆候。',
+      metric: 'ARPA: 14.9万',
+      icon: '↓',
+    },
+  ];
+
+  const container = document.getElementById('alert-cards');
+  container.innerHTML = alerts.map(a => `
+    <div class="card p-5 alert-${a.level}">
+      <div class="flex items-start justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="badge-${a.level} text-xs font-medium px-2 py-0.5 rounded">${a.level === 'red' ? 'CRITICAL' : 'WARNING'}</span>
+          <h4 class="text-sm font-medium text-navy-800">${a.title}</h4>
+        </div>
+        <span class="text-lg ${a.level === 'red' ? 'text-red-500' : 'text-yellow-500'}">${a.icon}</span>
+      </div>
+      <p class="text-xs text-slate-500 mb-3">${a.description}</p>
+      <div class="text-xs font-mono ${a.level === 'red' ? 'text-red-600' : 'text-yellow-600'}">${a.metric}</div>
+    </div>
+  `).join('');
+}
+
+function renderWeeklyTable() {
+  const w = weeklyData;
+  const kpis = [
+    { name: 'MRR', current: w.mrr[3], prev: w.mrr[2], avg: Math.round((w.mrr[0]+w.mrr[1]+w.mrr[2]+w.mrr[3])/4), unit: '万円', higherBetter: true },
+    { name: '新規商談', current: w.newDeals[3], prev: w.newDeals[2], avg: +((w.newDeals[0]+w.newDeals[1]+w.newDeals[2]+w.newDeals[3])/4).toFixed(1), unit: '件', higherBetter: true },
+    { name: '受注率', current: w.winRate[3], prev: w.winRate[2], avg: +((w.winRate[0]+w.winRate[1]+w.winRate[2]+w.winRate[3])/4).toFixed(1), unit: '%', higherBetter: true },
+    { name: 'Churn Rate', current: w.churn[3], prev: w.churn[2], avg: +((w.churn[0]+w.churn[1]+w.churn[2]+w.churn[3])/4).toFixed(1), unit: '%', higherBetter: false },
+    { name: 'NRR', current: w.nrr[3], prev: w.nrr[2], avg: +((w.nrr[0]+w.nrr[1]+w.nrr[2]+w.nrr[3])/4).toFixed(1), unit: '%', higherBetter: true },
+    { name: 'パイプライン', current: w.pipeline[3], prev: w.pipeline[2], avg: Math.round((w.pipeline[0]+w.pipeline[1]+w.pipeline[2]+w.pipeline[3])/4), unit: '件', higherBetter: true },
+    { name: '平均商談サイズ', current: w.avgDealSize[3], prev: w.avgDealSize[2], avg: +((w.avgDealSize[0]+w.avgDealSize[1]+w.avgDealSize[2]+w.avgDealSize[3])/4).toFixed(1), unit: '万円', higherBetter: true },
+  ];
+
+  const tbody = document.getElementById('weekly-table-body');
+  tbody.innerHTML = kpis.map(k => {
+    const change = k.unit === '%' ? (k.current - k.prev).toFixed(1) : ((k.current - k.prev) / k.prev * 100).toFixed(1);
+    const isGood = k.higherBetter ? change >= 0 : change <= 0;
+    const statusBadge = isGood
+      ? '<span class="badge-green text-xs px-2 py-0.5 rounded">Good</span>'
+      : Math.abs(change) > 5 || (k.unit === '%' && Math.abs(change) > 0.5)
+        ? '<span class="badge-red text-xs px-2 py-0.5 rounded">Alert</span>'
+        : '<span class="badge-yellow text-xs px-2 py-0.5 rounded">Watch</span>';
+    const changeDisplay = k.unit === '%' ? `${change > 0 ? '+' : ''}${change}pt` : `${change > 0 ? '+' : ''}${change}%`;
+    const changeClass = isGood ? 'text-green-600' : 'text-red-600';
+
+    return `<tr class="border-b border-surface-200 hover:bg-surface-50 transition-colors">
+      <td class="py-3 px-4 font-medium text-navy-800">${k.name}</td>
+      <td class="py-3 px-4 text-right text-slate-700">${k.current}${k.unit}</td>
+      <td class="py-3 px-4 text-right text-slate-400">${k.prev}${k.unit}</td>
+      <td class="py-3 px-4 text-right text-slate-400">${k.avg}${k.unit}</td>
+      <td class="py-3 px-4 text-right ${changeClass}">${changeDisplay}</td>
+      <td class="py-3 px-4 text-center">${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRecommendedActions() {
+  const actions = [
+    {
+      alert: 'Starter Churn 急上昇',
+      level: 'red',
+      actions: [
+        'Starterプラン顧客のオンボーディング完了率を確認（目標: 初月80%以上）',
+        '直近解約顧客5社にチャーンインタビュー実施（今週中）',
+        'Starter→Growthアップセルキャンペーンの検討（Churnリスク顧客への値引きアップグレードオファー）',
+      ],
+    },
+    {
+      alert: 'Outbound受注率低下',
+      level: 'red',
+      actions: [
+        'Outbound SDRチームのリード品質スコアリング基準を見直し',
+        '直近失注案件10件のロストリーズン分析',
+        'ナーチャリングメール序盤のA/Bテスト実施',
+      ],
+    },
+    {
+      alert: 'Enterprise商談パイプライン枯渇',
+      level: 'yellow',
+      actions: [
+        'Enterprise AE全員と1on1でパイプライン状況ヒアリング',
+        'ABM対象企業リストの更新とアウトリーチ計画策定',
+        'Enterprise向けウェビナー/イベント施策の前倒し検討',
+      ],
+    },
+    {
+      alert: '平均商談サイズ縮小',
+      level: 'yellow',
+      actions: [
+        'プラン別の新規受注割合の推移をモニタリング',
+        'Growth/Enterpriseプランの提案率を確認（営業チーム別）',
+        'バンドル提案やマルチシート割引の導入検討',
+      ],
+    },
+  ];
+
+  const container = document.getElementById('recommended-actions');
+  container.innerHTML = actions.map(a => `
+    <div class="bg-surface-50 rounded-lg p-4 border-l-2 ${a.level === 'red' ? 'border-red-500' : 'border-yellow-500'}">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="badge-${a.level} text-xs font-medium px-2 py-0.5 rounded">${a.level === 'red' ? 'CRITICAL' : 'WARNING'}</span>
+        <span class="text-sm font-medium text-navy-800">${a.alert}</span>
+      </div>
+      <ul class="space-y-1.5">
+        ${a.actions.map(act => `
+          <li class="flex items-start gap-2 text-xs text-slate-600">
+            <span class="text-navy-400 mt-0.5">→</span>
+            <span>${act}</span>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+  `).join('');
+}
+
+// ==========================================
+// INIT
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderKPICards();
+  renderMRRTrend();
+  renderARRGauge();
+  renderNRRTrend();
+});
+</script>
+</body>
+</html>
