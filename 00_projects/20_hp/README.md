@@ -150,14 +150,14 @@ cp -r /path/to/20_hp/* .
 
 ### 4. カスタムドメインの設定（オプション）
 
-現在のドメイン `rogerfilm.zrst.jp` を使用する場合：
+本番ドメイン `rogerfilm.com` を使用する場合：
 
 1. GitHubリポジトリの「Settings」→「Pages」に移動
-2. 「Custom domain」に `rogerfilm.zrst.jp` を入力
+2. 「Custom domain」に `rogerfilm.com` を入力
 3. 「Save」をクリック
 4. ドメインのDNS設定を変更：
    - レコードタイプ: `CNAME`
-   - ホスト名: `rogerfilm.zrst.jp`
+   - ホスト名: `rogerfilm.com`
    - 値: `YOUR_USERNAME.github.io`
 
 ### 5. 公開の確認
@@ -166,7 +166,7 @@ cp -r /path/to/20_hp/* .
 
 - `https://YOUR_USERNAME.github.io/rogerfilm-hp/`（リポジトリ名が含まれる場合）
 - `https://YOUR_USERNAME.github.io/`（リポジトリ名が `YOUR_USERNAME.github.io` の場合）
-- `https://rogerfilm.zrst.jp/`（カスタムドメインを設定した場合）
+- `https://rogerfilm.com/`（カスタムドメインを設定した場合）
 
 ### 6. 更新方法
 
