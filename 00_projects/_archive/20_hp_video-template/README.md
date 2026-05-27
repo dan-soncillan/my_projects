@@ -1,4 +1,12 @@
-# RogerFilm ホームページ
+# [ARCHIVED] RogerFilm ホームページ（映像制作向け旧テンプレ）
+
+> **⚠️ このフォルダはアーカイブされた旧テンプレートです。本番サイトのソースではありません。**
+>
+> - 本番 https://rogerfilm.com/ の実体は **[dan-soncillan/rogerfilm-hp](https://github.com/dan-soncillan/rogerfilm-hp)** (Next.js 14 + Tailwind, ローカル `~/rogerfilm-hp/`)
+> - 本物のRogerFilm合同会社は「データ支援・AI活用業務支援」の事業。このテンプレに書いてある映像制作の内容は実態と異なる
+> - 2026-05-28に `00_projects/20_hp/` から `00_projects/_archive/20_hp_video-template/` へ退避
+
+---
 
 RogerFilmの企業ホームページです。ゼロサイトから自前のホームページに移行するためのプロジェクトです。
 
